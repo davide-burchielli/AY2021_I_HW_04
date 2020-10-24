@@ -10,16 +10,60 @@
  * ========================================
 */
 #include "project.h"
+#include "InterruptRoutines.h"
+
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-
+    UART_Start();      //Start the UART
+    UART_PutString("Send:\n - 'B' or 'b' to start the device\n - 'S' or 's' to stop the device \r\n");
+   
+    isr_TIMER_ADC_StartEx(Custom_TIMER_ADC_ISR); //Start the ISR of the Time
+    isr_UART_RX_StartEx(Custom_UART_RX_ISR);   //Start the ISR of the UART
+    
     for(;;)
     {
-        /* Place your application code here. */
+        if (ReceivedByte != 0)
+            {
+                Communication_PIN_Write(1);
+                CyDelay(100);
+                Communication_PIN_Write(0);
+            }   
+        if (FlagAcquiredData)
+        {
+            switch (channel)
+            {
+                case POTENTIOMETER:
+                                   if (state == ON_OVERTHRE)
+                                    {
+                                        
+                                    
+                                    }
+                                    break;
+                case PHOTOR:
+                            if (data_mV >= THRESHOLD_mV)
+                            {
+                                state = ON_OVERTHRE;
+                                LED_PWM_Start();
+
+                            
+                            }
+                            else
+                            {
+                                state = ON_SUBTHRE;
+                            
+                            }
+                            break;
+
+                                    
+            
+            
+            }
+        
+        
+        }
     }
 }
 
