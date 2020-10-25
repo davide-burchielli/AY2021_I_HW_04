@@ -11,7 +11,7 @@
     #define POTENTIOMETER 0
     #define PHOTOR 1
     
-    #define TRANSMIT_BUFFER_SIZE 16
+    #define TRANSMIT_BUFFER_SIZE 50
     
     #include "project.h"
     
@@ -35,7 +35,7 @@
     uint8_t ReceivedByte;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
     volatile StateEnum state;
     volatile _Bool channel;
-    volatile _Bool FlagDataAcquired;
+    volatile _Bool FlagAcquireData;
     volatile _Bool FlagBlink;
 
     int32 PotentValue, PhotoResValue;

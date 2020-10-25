@@ -10,8 +10,6 @@
 #include "project.h"
 #include "InterruptRoutines.h"
 
-#define PERIOD 255
-#define VOLTAGE_mV 5000
 
 int32 data_digit;
 int32 data_mV;
@@ -33,12 +31,6 @@ void Stop_HW_Components()
     LED_PWM_Stop();
 }
 
-void SwitchChannel()
-{
-    ADC_DelSig_StopConvert();
-    AMUX_Select(channel);
-    ADC_DelSig_StartConvert();   
-}
 
 int32 AcquireData( )
 {
@@ -46,17 +38,27 @@ int32 AcquireData( )
     
     if( data_digit < 0) data_digit = 0;
     else if (data_digit > 65535) data_digit= 65535;
-    
+
     data_mV = ADC_DelSig_CountsTo_mVolts(data_digit);
     return data_mV;
 }
 
+void SwitchChannel()
+{
+    ADC_DelSig_StopConvert();
+    AMUX_FastSelect(channel);
+    ADC_DelSig_StartConvert();  
+}
+
+
 
 CY_ISR(Custom_UART_RX_ISR)
 {
-     if (UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY)
-        {
-            ReceivedByte= UART_ReadRxData();
+    // if (UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY)
+      //  {
+        //    ReceivedByte= UART_ReadRxData();
+            UART_PutString("RX ISR CHIAMTA\n");
+            ReceivedByte = UART_GetChar();
             FlagBlink = 1;
 
             switch (ReceivedByte)
@@ -76,25 +78,27 @@ CY_ISR(Custom_UART_RX_ISR)
             
             }
             
-        }        
+       // }        
 }    
 
 CY_ISR(Custom_TIMER_ADC_ISR)
 {
     Timer_ADC_ReadStatusRegister();
-    
+    if (!FlagAcquireData)
+        FlagAcquireData = 1;
+/*    
     if (state == ON_OVERTHRE)
     {
         channel = POTENTIOMETER;
         SwitchChannel();    
-        PotentValue = (AcquireData() * PERIOD)/VOLTAGE_mV;
+        PotentValue = AcquireData(); //(AcquireData() * PERIOD)/VOLTAGE_mV;
     }
     
     channel = PHOTOR;
     SwitchChannel();
     PhotoResValue = AcquireData();
-
-    FlagDataAcquired = 1;
+*/
+    
 }
 
 

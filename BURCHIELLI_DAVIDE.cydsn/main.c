@@ -11,9 +11,14 @@
 */
 #include "project.h"
 #include "InterruptRoutines.h"
+#include "stdio.h"
 
-#define THRESHOLD_mV 2.5
+#define THRESHOLD_mV 0
+#define PERIOD 255
+#define VOLTAGE_mV 5000
 
+
+int32 CompareValue = 0;
 
 int main(void)
 {
@@ -22,7 +27,7 @@ int main(void)
     ReceivedByte = 0;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
     state = OFF_SUBTHRE;
     channel = POTENTIOMETER;
-    FlagDataAcquired = 0;
+    FlagAcquireData = 0;
     FlagBlink = 0;
     PotentValue = 0;
     PhotoResValue = 0;
@@ -35,16 +40,28 @@ int main(void)
     
     for(;;)
     {
-        if (FlagBlink)
-            {
-                Communication_PIN_Write(1);
-                CyDelay(1000);
-                Communication_PIN_Write(0);
-                FlagBlink = 0 ;
-            }   
-            
-        if (FlagDataAcquired)
+        if (FlagAcquireData)
         {
+            if (state == ON_OVERTHRE)
+            {
+                channel = POTENTIOMETER;
+                SwitchChannel();    
+                PotentValue = AcquireData();
+                CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV;
+            sprintf(DataBuffer , "potentiometer: %ld mV\n\n", PotentValue);
+            UART_PutString(DataBuffer);
+            sprintf(DataBuffer , "Compare value: %ld mV\n\n", CompareValue);
+            UART_PutString(DataBuffer);                
+            }
+            
+            channel = PHOTOR;
+            SwitchChannel();
+            PhotoResValue = AcquireData();
+           // sprintf(DataBuffer , "---photoR: %ld mV\n\n", PhotoResValue);
+           // UART_PutString(DataBuffer);  
+           
+
+            /*
             if(channel == PHOTOR)
             {
                  if (PhotoResValue >= THRESHOLD_mV)
@@ -59,9 +76,31 @@ int main(void)
                     LED_PWM_Stop();
                   }          
             }
-            FlagDataAcquired = 0 ;
-        }
+            */
+            FlagAcquireData = 0 ;
+            
+                 if (PhotoResValue >= THRESHOLD_mV)
+                  {
+                    state = ON_OVERTHRE;
+                    LED_PWM_WriteCompare(CompareValue);     
+                    LED_PWM_Start();
+                  }
+                  else
+                  {
+                    state = ON_SUBTHRE;
+                    LED_PWM_Stop();
+                  }          
+        }     
+        
+        if (FlagBlink == 1)
+            {
+                Communication_PIN_Write(1);
+                CyDelay(100);
+                Communication_PIN_Write(0);
+                FlagBlink = 0 ;
+            }          
     }
 }
+
 
 /* [] END OF FILE */
