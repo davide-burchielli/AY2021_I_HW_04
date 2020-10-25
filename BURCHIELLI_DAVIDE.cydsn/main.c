@@ -12,10 +12,20 @@
 #include "project.h"
 #include "InterruptRoutines.h"
 
+#define THRESHOLD_mV 2.5
+
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
+    
+    ReceivedByte = 0;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
+    state = OFF_SUBTHRE;
+    channel = POTENTIOMETER;
+    FlagDataAcquired = 0;
+    FlagBlink = 0;
+    PotentValue = 0;
+    PhotoResValue = 0;
 
     UART_Start();      //Start the UART
     UART_PutString("Send:\n - 'B' or 'b' to start the device\n - 'S' or 's' to stop the device \r\n");
@@ -25,44 +35,31 @@ int main(void)
     
     for(;;)
     {
-        if (ReceivedByte != 0)
+        if (FlagBlink)
             {
                 Communication_PIN_Write(1);
-                CyDelay(100);
+                CyDelay(1000);
                 Communication_PIN_Write(0);
+                FlagBlink = 0 ;
             }   
-        if (FlagAcquiredData)
+            
+        if (FlagDataAcquired)
         {
-            switch (channel)
+            if(channel == PHOTOR)
             {
-                case POTENTIOMETER:
-                                   if (state == ON_OVERTHRE)
-                                    {
-                                        
-                                    
-                                    }
-                                    break;
-                case PHOTOR:
-                            if (data_mV >= THRESHOLD_mV)
-                            {
-                                state = ON_OVERTHRE;
-                                LED_PWM_Start();
-
-                            
-                            }
-                            else
-                            {
-                                state = ON_SUBTHRE;
-                            
-                            }
-                            break;
-
-                                    
-            
-            
+                 if (PhotoResValue >= THRESHOLD_mV)
+                  {
+                    state = ON_OVERTHRE;
+                    LED_PWM_WriteCompare(PotentValue);     
+                    LED_PWM_Start();
+                  }
+                  else
+                  {
+                    state = ON_SUBTHRE;
+                    LED_PWM_Stop();
+                  }          
             }
-        
-        
+            FlagDataAcquired = 0 ;
         }
     }
 }

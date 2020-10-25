@@ -8,11 +8,9 @@
 #ifndef _INTERRUPT_ROUTINES_H
     #define _INTERRUPT_ROUTINES_H
     
-    #define ON 1
-    #define OFF 0
     #define POTENTIOMETER 0
     #define PHOTOR 1
-    #define THRESHOLD_mV 2.5
+    
     #define TRANSMIT_BUFFER_SIZE 16
     
     #include "project.h"
@@ -30,13 +28,17 @@
     
     void Start_HW_Components();
     void Stop_HW_Components();
+    void SwitchChannel();
+    int32 AcquireData( );
     
     
-    uint8_t ReceivedByte = 0;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
-    volatile StateEnum state = OFF;
-    volatile _Bool channel = POTENTIOMETER;
-    volatile _Bool FlagAcquiredData = 0;
-    int32 data_mV;
+    uint8_t ReceivedByte;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
+    volatile StateEnum state;
+    volatile _Bool channel;
+    volatile _Bool FlagDataAcquired;
+    volatile _Bool FlagBlink;
+
+    int32 PotentValue, PhotoResValue;
     
     char DataBuffer[TRANSMIT_BUFFER_SIZE];
     
