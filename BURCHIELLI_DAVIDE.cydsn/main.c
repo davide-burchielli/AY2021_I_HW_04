@@ -13,7 +13,7 @@
 #include "InterruptRoutines.h"
 #include "stdio.h"
 
-#define THRESHOLD_mV 0
+#define THRESHOLD_mV 4700
 #define PERIOD 255
 #define VOLTAGE_mV 5000
 
@@ -47,46 +47,27 @@ int main(void)
                 channel = POTENTIOMETER;
                 SwitchChannel();    
                 PotentValue = AcquireData();
-                CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV;
-            sprintf(DataBuffer , "potentiometer: %ld mV\n\n", PotentValue);
-            UART_PutString(DataBuffer);
-            sprintf(DataBuffer , "Compare value: %ld mV\n\n", CompareValue);
-            UART_PutString(DataBuffer);                
+                CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV;             
             }
             
             channel = PHOTOR;
             SwitchChannel();
             PhotoResValue = AcquireData();
-           // sprintf(DataBuffer , "---photoR: %ld mV\n\n", PhotoResValue);
-           // UART_PutString(DataBuffer);  
-           
-
-            /*
-            if(channel == PHOTOR)
-            {
-                 if (PhotoResValue >= THRESHOLD_mV)
-                  {
-                    state = ON_OVERTHRE;
-                    LED_PWM_WriteCompare(PotentValue);     
-                    LED_PWM_Start();
-                  }
-                  else
-                  {
-                    state = ON_SUBTHRE;
-                    LED_PWM_Stop();
-                  }          
-            }
-            */
+            sprintf(DataBuffer , "Photoresi: %ld mV\n\n", PhotoResValue);
+            
+            UART_PutString(DataBuffer);   
             FlagAcquireData = 0 ;
             
                  if (PhotoResValue >= THRESHOLD_mV)
                   {
+                    UART_PutString("--OVERTHRESHOLD--\n");
                     state = ON_OVERTHRE;
                     LED_PWM_WriteCompare(CompareValue);     
                     LED_PWM_Start();
                   }
                   else
                   {
+                    UART_PutString("--UNDERTHRESHOLD--\n");
                     state = ON_SUBTHRE;
                     LED_PWM_Stop();
                   }          
