@@ -17,16 +17,18 @@ int32 data_mV;
 
 void Start_HW_Components()
 {
-    AMUX_Select(channel);
+    
     AMUX_Start();
+    AMUX_FastSelect(PHOTOR);
     ADC_DelSig_Start();
     Timer_ADC_Start();
 }
 
 void Stop_HW_Components()
 {
-    AMUX_Stop();
+
     Timer_ADC_Stop();
+    AMUX_DisconnectAll();
     ADC_DelSig_Stop();
     LED_PWM_Stop();
 }
@@ -35,7 +37,7 @@ void Stop_HW_Components()
 int32 AcquireData( )
 {
     data_digit = ADC_DelSig_Read32();
-    
+
     if( data_digit < 0) data_digit = 0;
     else if (data_digit > 65535) data_digit= 65535;
 
@@ -50,14 +52,8 @@ void SwitchChannel()
     ADC_DelSig_StartConvert();  
 }
 
-
-
 CY_ISR(Custom_UART_RX_ISR)
 {
-    // if (UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY)
-      //  {
-        //    ReceivedByte= UART_ReadRxData();
-            UART_PutString("RX ISR CHIAMTA\n");
             ReceivedByte = UART_GetChar();
             FlagBlink = 1;
 
@@ -65,20 +61,15 @@ CY_ISR(Custom_UART_RX_ISR)
             {
                 case 'B':
                 case 'b':
-                        state = ON_SUBTHRE;
-                        channel = POTENTIOMETER;
                         Start_HW_Components();
                         break;
                 case 'S':
                 case 's':
-                        state = OFF_SUBTHRE;  
                         Stop_HW_Components();
                         break;
                 default: break;
             
-            }
-            
-       // }        
+            }     
 }    
 
 CY_ISR(Custom_TIMER_ADC_ISR)
@@ -86,19 +77,6 @@ CY_ISR(Custom_TIMER_ADC_ISR)
     Timer_ADC_ReadStatusRegister();
     if (!FlagAcquireData)
         FlagAcquireData = 1;
-/*    
-    if (state == ON_OVERTHRE)
-    {
-        channel = POTENTIOMETER;
-        SwitchChannel();    
-        PotentValue = AcquireData(); //(AcquireData() * PERIOD)/VOLTAGE_mV;
-    }
-    
-    channel = PHOTOR;
-    SwitchChannel();
-    PhotoResValue = AcquireData();
-*/
-    
 }
 
 

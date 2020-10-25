@@ -1,19 +1,12 @@
 /* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
+
  * ========================================
 */
 #include "project.h"
 #include "InterruptRoutines.h"
 #include "stdio.h"
 
-#define THRESHOLD_mV 4700
+#define THRESHOLD_mV 4400
 #define PERIOD 255
 #define VOLTAGE_mV 5000
 
@@ -25,8 +18,7 @@ int main(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
     
     ReceivedByte = 0;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
-    state = OFF_SUBTHRE;
-    channel = POTENTIOMETER;
+    channel = PHOTOR;
     FlagAcquireData = 0;
     FlagBlink = 0;
     PotentValue = 0;
@@ -40,48 +32,40 @@ int main(void)
     
     for(;;)
     {
-        if (FlagAcquireData)
-        {
-            if (state == ON_OVERTHRE)
-            {
-                channel = POTENTIOMETER;
-                SwitchChannel();    
-                PotentValue = AcquireData();
-                CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV;             
-            }
-            
-            channel = PHOTOR;
-            SwitchChannel();
-            PhotoResValue = AcquireData();
-            sprintf(DataBuffer , "Photoresi: %ld mV\n\n", PhotoResValue);
-            
-            UART_PutString(DataBuffer);   
-            FlagAcquireData = 0 ;
-            
-                 if (PhotoResValue >= THRESHOLD_mV)
-                  {
-                    UART_PutString("--OVERTHRESHOLD--\n");
-                    state = ON_OVERTHRE;
-                    LED_PWM_WriteCompare(CompareValue);     
-                    LED_PWM_Start();
-                  }
-                  else
-                  {
-                    UART_PutString("--UNDERTHRESHOLD--\n");
-                    state = ON_SUBTHRE;
-                    LED_PWM_Stop();
-                  }          
-        }     
-        
         if (FlagBlink == 1)
             {
                 Communication_PIN_Write(1);
                 CyDelay(100);
                 Communication_PIN_Write(0);
                 FlagBlink = 0 ;
-            }          
+            } 
+
+        if (FlagAcquireData)
+        {
+            channel = PHOTOR;
+            SwitchChannel();
+            PhotoResValue = AcquireData();
+            sprintf(DataBuffer , "**PhotoResistenza: %ld mV\n\n", PhotoResValue);
+            UART_PutString(DataBuffer);   
+            
+            if (PhotoResValue >= THRESHOLD_mV)
+            {
+                //state = ON_RTHRE;
+                channel = POTENTIOMETER;
+                SwitchChannel();    
+                PotentValue = AcquireData();
+                CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV; 
+                LED_PWM_WriteCompare(CompareValue);     
+                LED_PWM_Start();
+            sprintf(DataBuffer , "--POTENTIOMETER: %ld mV\n\n", PotentValue);
+            UART_PutString(DataBuffer);                   
+            }                
+            else
+                LED_PWM_Stop();
+            
+            FlagAcquireData = 0 ;
+        }       
     }
 }
-
 
 /* [] END OF FILE */

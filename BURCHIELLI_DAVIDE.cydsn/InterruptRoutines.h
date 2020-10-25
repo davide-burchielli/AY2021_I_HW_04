@@ -11,18 +11,10 @@
     #define POTENTIOMETER 0
     #define PHOTOR 1
     
-    #define TRANSMIT_BUFFER_SIZE 50
+    #define TRANSMIT_BUFFER_SIZE 32
     
     #include "project.h"
-    
-    typedef enum {
-                    OFF_SUBTHRE,   // 0
-                    ON_SUBTHRE,    // 1
-                    OFF_OVERTHRE,  // 2
-                    ON_OVERTHRE,   // 3
-        
-                  } StateEnum;    
-    
+
     CY_ISR_PROTO (Custom_TIMER_ADC_ISR);
     CY_ISR_PROTO (Custom_UART_RX_ISR);
     
@@ -33,7 +25,7 @@
     
     
     uint8_t ReceivedByte;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
-    volatile StateEnum state;
+    
     volatile _Bool channel;
     volatile _Bool FlagAcquireData;
     volatile _Bool FlagBlink;
