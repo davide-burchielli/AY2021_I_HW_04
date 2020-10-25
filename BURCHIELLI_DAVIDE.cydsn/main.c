@@ -25,8 +25,10 @@ int main(void)
     PhotoResValue = 0;
 
     UART_Start();      //Start the UART
-    UART_PutString("Send:\n - 'B' or 'b' to start the device\n - 'S' or 's' to stop the device \r\n");
+    //UART_PutString("Send:\n - 'B' or 'b' to start the device\n - 'S' or 's' to stop the device \r\n");
    
+    DataBuffer[0] = 0xA0;
+    DataBuffer[TRANSMIT_BUFFER_SIZE-1] = 0xC0;
     isr_TIMER_ADC_StartEx(Custom_TIMER_ADC_ISR); //Start the ISR of the Time
     isr_UART_RX_StartEx(Custom_UART_RX_ISR);   //Start the ISR of the UART
     
@@ -45,8 +47,11 @@ int main(void)
             channel = PHOTOR;
             SwitchChannel();
             PhotoResValue = AcquireData();
-            sprintf(DataBuffer , "**PhotoResistenza: %ld mV\n\n", PhotoResValue);
-            UART_PutString(DataBuffer);   
+            DataBuffer[1] = PhotoResValue >> 8 ;
+            DataBuffer[2] = PhotoResValue & 0xFF ;
+            UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);
+            //sprintf(DataBuffer , "**PhotoResistenza: %ld mV\n\n", PhotoResValue);
+            //UART_PutString(DataBuffer);   
             
             if (PhotoResValue >= THRESHOLD_mV)
             {
@@ -57,8 +62,12 @@ int main(void)
                 CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV; 
                 LED_PWM_WriteCompare(CompareValue);     
                 LED_PWM_Start();
-            sprintf(DataBuffer , "--POTENTIOMETER: %ld mV\n\n", PotentValue);
-            UART_PutString(DataBuffer);                   
+                
+                DataBuffer[1] = PotentValue >> 8 ;
+                DataBuffer[2] = PotentValue & 0xFF ;
+                UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);
+            //sprintf(DataBuffer , "--POTENTIOMETER: %ld mV\n\n", PotentValue);
+            //UART_PutString(DataBuffer);                   
             }                
             else
                 LED_PWM_Stop();

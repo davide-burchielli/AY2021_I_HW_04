@@ -10,8 +10,9 @@
     
     #define POTENTIOMETER 0
     #define PHOTOR 1
+    #define BYTE_TO_SEND 2
     
-    #define TRANSMIT_BUFFER_SIZE 32
+    #define TRANSMIT_BUFFER_SIZE 1 + BYTE_TO_SEND + 1
     
     #include "project.h"
 
@@ -32,7 +33,7 @@
 
     int32 PotentValue, PhotoResValue;
     
-    char DataBuffer[TRANSMIT_BUFFER_SIZE];
+    uint8_t DataBuffer[TRANSMIT_BUFFER_SIZE];
     
 #endif
 /* [] END OF FILE */
