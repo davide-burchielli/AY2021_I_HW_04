@@ -10,7 +10,7 @@
     
     #define POTENTIOMETER 0
     #define PHOTOR 1
-    #define BYTE_TO_SEND 2
+    #define BYTE_TO_SEND 4
     
     #define TRANSMIT_BUFFER_SIZE 1 + BYTE_TO_SEND + 1
     

@@ -47,31 +47,24 @@ int main(void)
             channel = PHOTOR;
             SwitchChannel();
             PhotoResValue = AcquireData();
-            DataBuffer[1] = PhotoResValue >> 8 ;
-            DataBuffer[2] = PhotoResValue & 0xFF ;
-            UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);
-            //sprintf(DataBuffer , "**PhotoResistenza: %ld mV\n\n", PhotoResValue);
-            //UART_PutString(DataBuffer);   
-            
             if (PhotoResValue >= THRESHOLD_mV)
             {
-                //state = ON_RTHRE;
                 channel = POTENTIOMETER;
                 SwitchChannel();    
                 PotentValue = AcquireData();
                 CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV; 
                 LED_PWM_WriteCompare(CompareValue);     
-                LED_PWM_Start();
-                
-                DataBuffer[1] = PotentValue >> 8 ;
-                DataBuffer[2] = PotentValue & 0xFF ;
-                UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);
-            //sprintf(DataBuffer , "--POTENTIOMETER: %ld mV\n\n", PotentValue);
-            //UART_PutString(DataBuffer);                   
+                LED_PWM_Start();                  
             }                
             else
                 LED_PWM_Stop();
             
+            DataBuffer[1] = PhotoResValue >> 8 ;
+            DataBuffer[2] = PhotoResValue & 0xFF ;
+            DataBuffer[3] = PotentValue >> 8 ;
+            DataBuffer[4] = PotentValue & 0xFF ;
+            UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);    
+                
             FlagAcquireData = 0 ;
         }       
     }
