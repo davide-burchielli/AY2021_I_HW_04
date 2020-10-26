@@ -7,13 +7,10 @@
 #include "stdio.h"
 
 #define PERIOD 255
-#define VOLTAGE_mV 5000
-#define NUMB_CAL 10
-#define ADD_THRESH_MEAN 100
+#define MAX_VALUE 65535
+#define THRESHOLD MAX_VALUE * 3/4
 
 int32 CompareValue = 0;
-int32 accum = 0;
-int32 cont = 0;
 
 int main(void)
 {
@@ -26,7 +23,7 @@ int main(void)
     PhotoResValue = 0;
 
     UART_Start();   //Start the UART
-    //UART_PutString("Send:\n - 'B' or 'b' to start the device\n - 'S' or 's' to stop the device \r\n");
+    
     DataBuffer[0] = 0xA0;
     DataBuffer[TRANSMIT_BUFFER_SIZE-1] = 0xC0;
     
@@ -35,33 +32,20 @@ int main(void)
     
     for(;;)
     {
-        if (FlagCalibration)
-            {  
-              accum = 0;
-              Threshold = 0;
-              cont = 0;
-              for ( cont=0; cont < NUMB_CAL ; cont ++)
-                {       
-                        while (!FlagAcquireData);
-                        PhotoResValue = AcquireData();
-                        accum += PhotoResValue;
-                        FlagAcquireData = 0;
-                }
-              Threshold = ( accum / NUMB_CAL ) + ADD_THRESH_MEAN;
-              FlagCalibration = 0;
-            }
-
         if (FlagAcquireData)
         {
             Channel = PHOTOR;
             SwitchChannel();
             PhotoResValue = AcquireData();
-            if (PhotoResValue >= Threshold)
+
+            if (PhotoResValue <= THRESHOLD)
             {
+                
                 Channel = POTENTIOMETER;
                 SwitchChannel();    
                 PotentValue = AcquireData();
-                CompareValue = (PotentValue * PERIOD)/VOLTAGE_mV; 
+                CompareValue = (PotentValue * PERIOD)/MAX_VALUE; 
+
                 LED_PWM_WriteCompare(CompareValue);     
                 LED_PWM_Start();                  
             }                
@@ -69,14 +53,12 @@ int main(void)
                 LED_PWM_Stop();
                 
             FlagAcquireData = 0 ;
-           
-            Communication_LED_PIN_Write(1);
+                      
             DataBuffer[1] = PhotoResValue >> 8 ;
             DataBuffer[2] = PhotoResValue & 0xFF ;
             DataBuffer[3] = PotentValue >> 8 ;
             DataBuffer[4] = PotentValue & 0xFF ;
             UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);  
-            Communication_LED_PIN_Write(0);
 
         }       
     }

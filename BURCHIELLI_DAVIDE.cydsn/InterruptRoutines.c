@@ -36,8 +36,7 @@ int32 AcquireData( )
     if( data_digit < 0) data_digit = 0;
     else if (data_digit > 65535) data_digit= 65535;
 
-    data_mV = ADC_DelSig_CountsTo_mVolts(data_digit);
-    return data_mV;
+    return data_digit;
 }
 
 void SwitchChannel()
@@ -54,12 +53,13 @@ CY_ISR(Custom_UART_RX_ISR)
       {
         case 'B':
         case 'b':
-                Start_HW_Components();
-                FlagCalibration = 1;
+                Start_HW_Components();  
+                Communication_LED_PIN_Write(1);
                 break;
         case 'S':
         case 's':
                 Stop_HW_Components();
+                Communication_LED_PIN_Write(0);
                 break;
         default: break;           
       }     
