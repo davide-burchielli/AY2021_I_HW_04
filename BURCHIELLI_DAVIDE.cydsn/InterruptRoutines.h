@@ -10,8 +10,8 @@
     
     #define POTENTIOMETER 0
     #define PHOTOR 1
-    #define BYTE_TO_SEND 4
     
+    #define BYTE_TO_SEND 4
     #define TRANSMIT_BUFFER_SIZE 1 + BYTE_TO_SEND + 1
     
     #include "project.h"
@@ -25,15 +25,15 @@
     int32 AcquireData( );
     
     
-    uint8_t ReceivedByte;  // Define and initialize the variable ReceivedByte on which it is saved the byte recived
-    
-    volatile _Bool channel;
+    uint8_t ReceivedChar;  // Define and initialize the variable ReceivedChar on which it is saved the byte recived
+    volatile _Bool Channel;
     volatile _Bool FlagAcquireData;
     volatile _Bool FlagBlink;
-
+    volatile _Bool FlagCalibration;
     int32 PotentValue, PhotoResValue;
-    
     uint8_t DataBuffer[TRANSMIT_BUFFER_SIZE];
+    int32 Threshold;
+    
     
 #endif
 /* [] END OF FILE */

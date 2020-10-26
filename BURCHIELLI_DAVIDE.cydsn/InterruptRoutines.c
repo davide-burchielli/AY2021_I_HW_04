@@ -10,14 +10,11 @@
 #include "project.h"
 #include "InterruptRoutines.h"
 
-
 int32 data_digit;
 int32 data_mV;
 
-
 void Start_HW_Components()
-{
-    
+{  
     AMUX_Start();
     AMUX_FastSelect(PHOTOR);
     ADC_DelSig_Start();
@@ -26,13 +23,11 @@ void Start_HW_Components()
 
 void Stop_HW_Components()
 {
-
     Timer_ADC_Stop();
     AMUX_DisconnectAll();
     ADC_DelSig_Stop();
     LED_PWM_Stop();
 }
-
 
 int32 AcquireData( )
 {
@@ -48,28 +43,28 @@ int32 AcquireData( )
 void SwitchChannel()
 {
     ADC_DelSig_StopConvert();
-    AMUX_FastSelect(channel);
+    AMUX_FastSelect(Channel);
     ADC_DelSig_StartConvert();  
 }
 
 CY_ISR(Custom_UART_RX_ISR)
 {
-            ReceivedByte = UART_GetChar();
-            FlagBlink = 1;
+  ReceivedChar = UART_GetChar();
+  FlagBlink = 1;
 
-            switch (ReceivedByte)
-            {
-                case 'B':
-                case 'b':
-                        Start_HW_Components();
-                        break;
-                case 'S':
-                case 's':
-                        Stop_HW_Components();
-                        break;
-                default: break;
-            
-            }     
+  switch (ReceivedChar)
+  {
+    case 'B':
+    case 'b':
+            Start_HW_Components();
+            FlagCalibration = 1;
+            break;
+    case 'S':
+    case 's':
+            Stop_HW_Components();
+            break;
+    default: break;           
+  }     
 }    
 
 CY_ISR(Custom_TIMER_ADC_ISR)
@@ -78,6 +73,5 @@ CY_ISR(Custom_TIMER_ADC_ISR)
     if (!FlagAcquireData)
         FlagAcquireData = 1;
 }
-
 
 /* [] END OF FILE */
