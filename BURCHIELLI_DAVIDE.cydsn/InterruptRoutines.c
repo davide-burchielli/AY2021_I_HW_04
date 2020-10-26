@@ -50,21 +50,19 @@ void SwitchChannel()
 CY_ISR(Custom_UART_RX_ISR)
 {
   ReceivedChar = UART_GetChar();
-  FlagBlink = 1;
-
-  switch (ReceivedChar)
-  {
-    case 'B':
-    case 'b':
-            Start_HW_Components();
-            FlagCalibration = 1;
-            break;
-    case 'S':
-    case 's':
-            Stop_HW_Components();
-            break;
-    default: break;           
-  }     
+      switch (ReceivedChar)
+      {
+        case 'B':
+        case 'b':
+                Start_HW_Components();
+                FlagCalibration = 1;
+                break;
+        case 'S':
+        case 's':
+                Stop_HW_Components();
+                break;
+        default: break;           
+      }     
 }    
 
 CY_ISR(Custom_TIMER_ADC_ISR)

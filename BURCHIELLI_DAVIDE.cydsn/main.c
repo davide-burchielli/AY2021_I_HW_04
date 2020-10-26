@@ -22,7 +22,6 @@ int main(void)
     ReceivedChar = 0;  
     Channel = PHOTOR;
     FlagAcquireData = 0;
-    FlagBlink = 0;
     PotentValue = 0;
     PhotoResValue = 0;
 
@@ -36,14 +35,6 @@ int main(void)
     
     for(;;)
     {
-        if (FlagBlink == 1)
-            {
-                Communication_LED_PIN_Write(1);
-                CyDelay(100);
-                Communication_LED_PIN_Write(0);
-                FlagBlink = 0 ;
-            } 
-            
         if (FlagCalibration)
             {  
               accum = 0;
@@ -79,12 +70,13 @@ int main(void)
                 
             FlagAcquireData = 0 ;
            
-            
+            Communication_LED_PIN_Write(1);
             DataBuffer[1] = PhotoResValue >> 8 ;
             DataBuffer[2] = PhotoResValue & 0xFF ;
             DataBuffer[3] = PotentValue >> 8 ;
             DataBuffer[4] = PotentValue & 0xFF ;
             UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);  
+            Communication_LED_PIN_Write(0);
 
         }       
     }

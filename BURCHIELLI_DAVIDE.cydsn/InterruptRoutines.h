@@ -28,7 +28,6 @@
     uint8_t ReceivedChar;  // Define and initialize the variable ReceivedChar on which it is saved the byte recived
     volatile _Bool Channel;
     volatile _Bool FlagAcquireData;
-    volatile _Bool FlagBlink;
     volatile _Bool FlagCalibration;
     int32 PotentValue, PhotoResValue;
     uint8_t DataBuffer[TRANSMIT_BUFFER_SIZE];
