@@ -1,10 +1,13 @@
-/* ======================================================================================================
+/* ==============================================================================================================
     author: Davide Burchielli
 
-    This file defines the functions and the ISRs.
-    Custom_UART_RX_ISR is executed everytime the isr_UART_RX is triggered by the arrival of a byte. 
-    Custom_TIMER_ADC_ISR is executed everytime the isr_TIMER_ADC is triggered by a TC event, so every 5 seconds.  
- * ======================================================================================================
+    This file defines the functions and the ISRs:
+    Custom_UART_RX_ISR is executed everytime the isr_UART_RX is triggered by the arrival of a byte. If this
+    one is 'B' or 'b', the product is switched on, whereas if it is 'S' or 's', the product is switched off.
+    
+    Custom_TIMER_ADC_ISR is executed everytime the isr_TIMER_ADC is triggered by a TC event, so every 100 ms.  
+    
+ * ==============================================================================================================
 */
 
 #include "project.h"
@@ -59,7 +62,8 @@ CY_ISR(Custom_UART_RX_ISR)
         case 'B':
         case 'b':
                 Start_HW_Components();  // Starts the Hardware components; the sampling of the photoresistor signal starts.
-                Communication_LED_PIN_Write(1);  // Turn on the Communication_LED to warn that the Psoc is sending data.
+                Communication_LED_PIN_Write(1);  // Turn on the Communication_LED to indicate that the Psoc is sending data.
+                                                 // NOTE: the Communication_LED remains on as long as the product is switched on.
                 break;
         case 'S':
         case 's':
@@ -74,8 +78,7 @@ CY_ISR(Custom_UART_RX_ISR)
 CY_ISR(Custom_TIMER_ADC_ISR)
 {
     Timer_ADC_ReadStatusRegister();  // Read Timer status register to bring interrupt line low
-    if (!FlagAcquireData)  // To be sure that the last value has been read (and so FlagAcquireData has been reset to 0 by the main )
-        FlagAcquireData = 1; 
+    FlagAcquireData = 1; 
 }
 
 /* [] END OF FILE */
