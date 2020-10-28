@@ -29,7 +29,7 @@
 #define MAX_VALUE 65535            // Macro that rappresents the maximum value of the potentiometer signal (since 16 bit)
 #define THRESHOLD MAX_VALUE * 3/4  // Macro that rappresents the Threshold under which the Lamp_LED is switched on
                                    // NOTE: the threshold is set 3/4 the maximum value of the photoresistor signal (which is 65535, 16 bit)
-                                   // since sperimentally it seems a reasonable brightness value.
+                                   // since sperimentally it seemed a reasonable brightness value.
 
 int32 CompareValue = 0;  // CompareValue variable contains the Compare Value of the PWM obtained form the potentiometer signal 
 
