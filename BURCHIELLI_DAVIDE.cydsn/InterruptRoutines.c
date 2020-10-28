@@ -1,13 +1,13 @@
-/* ==============================================================================================================
+/* ====================================================================================================================
     author: Davide Burchielli
 
     This file defines the functions and the ISRs:
-    Custom_UART_RX_ISR is executed everytime the isr_UART_RX is triggered by the arrival of a byte. If this
-    one is 'B' or 'b', the product is switched on, whereas if it is 'S' or 's', the product is switched off.
+    Custom_UART_RX_ISR is executed everytime the isr_UART_RX is triggered by the arrival of a byte. If this is
+    'B' or 'b', the product is switched on, whereas if it is 'S' or 's', the product is switched off.
     
-    Custom_TIMER_ADC_ISR is executed everytime the isr_TIMER_ADC is triggered by a TC event, so every 100 ms.  
+    Custom_TIMER_ADC_ISR is executed everytime the isr_TIMER_ADC is triggered by a TC event, so every 100 ms (10 Hz)
     
- * ==============================================================================================================
+ * ====================================================================================================================
 */
 
 #include "project.h"
@@ -19,17 +19,17 @@ int32 read_data;  // read_data variable contains the value read from the ADC
 void Start_HW_Components()   // This function starts the hardware components: MUX, ADC and Timer
 {  
     AMUX_Start();            // Start the MUX
-    AMUX_FastSelect(PHOTOR); // Disconnect the last connection and connect the PHOTOR channel
+    AMUX_FastSelect(PHOTOR); // Connect the PHOTOR channel
     ADC_DelSig_Start();      // Start the ADC
     Timer_ADC_Start();       // Start the Timer
 }
 
-void Stop_HW_Components()   // This function stops the hardware components: MUX, ADC and Timer
+void Stop_HW_Components()   // This function stops the hardware components: MUX, ADC, Timer and PWM.
 {
     Timer_ADC_Stop();       // Stop the Timer
     AMUX_DisconnectAll();   // Disconnect all the channel of the MUX
     ADC_DelSig_Stop();      // Stop the ADC
-    LED_PWM_Stop();         // Stop the PWM associated to the Lamp_LED, therefore switching it off.
+    LED_PWM_Stop();         // Stop the PWM associated to Lamp_LED, therefore switching it off.
 }
 
 int32 AcquireData( )       // This function reads and returns the ADC result
@@ -56,18 +56,18 @@ void SwitchChannel()  // This function switches channel of the MUX
 // Define Custom_UART_RX_ISR
 CY_ISR(Custom_UART_RX_ISR)
 {
-  ReceivedChar = UART_GetChar();  // Save in ReceivedChar the last received byte of data.
+      ReceivedChar = UART_GetChar();  // Save in ReceivedChar the last received byte of data.
       switch (ReceivedChar)
       {
         case 'B':
         case 'b':
-                Start_HW_Components();  // Starts the Hardware components; the sampling of the photoresistor signal starts.
-                Communication_LED_PIN_Write(1);  // Turn on the Communication_LED to indicate that the Psoc is sending data.
+                Start_HW_Components();           // Starts the Hardware components; the sampling of the photoresistor signal starts.
+                Communication_LED_PIN_Write(1);  // Turn on the Communication_LED to indicate that the PSoC is sending data.
                                                  // NOTE: the Communication_LED remains on as long as the product is switched on.
                 break;
         case 'S':
         case 's':
-                Stop_HW_Components();  // Stops the Hardware components; the ADC stops to sample and convert and the Lamp_LED is switched off
+                Stop_HW_Components();            // Stops the Hardware components; the ADC stops to sample and the Lamp_LED is switched off
                 Communication_LED_PIN_Write(0);  // Turn off the Communication_LED.
                 break;
         default: break;           
@@ -77,7 +77,7 @@ CY_ISR(Custom_UART_RX_ISR)
 // Define Custom_TIMER_ADC_ISR
 CY_ISR(Custom_TIMER_ADC_ISR)
 {
-    Timer_ADC_ReadStatusRegister();  // Read Timer status register to bring interrupt line low
+    Timer_ADC_ReadStatusRegister();  // Read Timer status register to bring interrupt line low.
     FlagAcquireData = 1; 
 }
 

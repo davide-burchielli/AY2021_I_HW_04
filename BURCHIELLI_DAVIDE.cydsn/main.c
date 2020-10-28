@@ -1,17 +1,24 @@
-/* ===========================================================================================================
+/* =====================================================================================================================
     author: Davide Burchielli
 
-    This file manage the acquisition of the photoresistor and the potentiometer signals only when the
-    variable FLagAcquireData is set = 1 by the calling of Custom_TIMER_ADC_ISR. In particular, the 
-    potentiometer signal is acquired only when the photoresistor signal (the brigthness) is < or = 
-    than a specified threshold (see the macro THRESHOLD) so that, based on this potentiometer signal,
-    the LED brightness intensity is driven through the PWM. 
+    This file manages the acquisition of the photoresistor and the potentiometer signals only when the variable
+    FLagAcquireData is set = 1 by the calling of Custom_TIMER_ADC_ISR, which occurs every 100 ms (frequency of
+    10 Hz). In particular, the potentiometer signal is acquired only when the photoresistor signal (the brigthness)
+    is < or = than a specified threshold (see the macro THRESHOLD). Based on this potentiometer signal, the LED 
+    brightness intensity is driven through the PWM. 
     
-    Finally, the photoresistor and the potentiometer signals saved in DataBuffer are sent to the serial port. 
-    NOTE: When the system is overthreshold, the potentiometer bytes sent rappresent the last value acquired 
-    by the potentiometer when the system was underthreshold or , if the system has never been under 
-    threshold, it is sent 0. 
- * ===========================================================================================================
+    Finally, the photoresistor and the potentiometer signals, saved in DataBuffer variable, are sent to the 
+    serial port, in a packet structure composed by:
+    
+                                        HEADER : 0XA0
+                                        Photoresistor data:  2 bytes
+                                        Potentiometer data : 2 bytes
+                                        TAIL : 0xC0
+    
+    NOTE: When the system is overthreshold, the potentiometer bytes sent rappresent the last value sampled 
+    by the potentiometer when the system was underthreshold or , if the system has never been under threshold,
+    it is sent 0. 
+ * =====================================================================================================================
 */
 
 #include "project.h"
@@ -66,14 +73,14 @@ int main(void)
             else
                 LED_PWM_Stop();    // Stop the PWM, therefore switching off Lamp_LED.
                 
-            FlagAcquireData = 0 ;  // Reset FlagAcquireData 
-                      
+               
             DataBuffer[1] = PhotoResValue >> 8 ;    // Save the MSB of PhotoResValue as the 2° element of DataBuffer array
             DataBuffer[2] = PhotoResValue & 0xFF ;  // Save the LSB of PhotoResValue as the 3° element of DataBuffer array
             DataBuffer[3] = PotentValue >> 8 ;      // Save the MSB of PotentValue as the 4° element of DataBuffer array
             DataBuffer[4] = PotentValue & 0xFF ;    // Save the LSB of PotentValue as the 5° element of DataBuffer array
             UART_PutArray(DataBuffer, TRANSMIT_BUFFER_SIZE);  // Transmit DataBuffer
 
+            FlagAcquireData = 0 ;  // Reset FlagAcquireData 
         }       
     }
 }
